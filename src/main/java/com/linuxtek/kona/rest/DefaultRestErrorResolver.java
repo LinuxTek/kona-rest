@@ -162,13 +162,18 @@ public class DefaultRestErrorResolver implements RestErrorResolver, MessageSourc
         applyDef(m, clazz.getName(), status);
     }
 
+    protected String getContactEmail() {
+        return "us";
+    };
+
     private void applyDef(Map<String,String> m, String key, HttpStatus status) {
     	String clientMessage = null;
     	String developerMessage = null;
     	String moreInfoUrl = null;
     	
     	if (key.equals("org.springframework.dao.DataIntegrityViolationException")) {
-    		developerMessage = "Internal data validation error. Please contact support@fabriq.io with API request details.";
+    		developerMessage = "Internal data validation error. Please contact " 
+                + getContactEmail() + " with API request details.";
     	} else if (key.equals("org.springframework.web.servlet.NoHandlerFoundException")) {
     		developerMessage = "Resource not found";
     	}
