@@ -329,25 +329,34 @@ public class DefaultRestErrorResolver implements RestErrorResolver, MessageSourc
      */
     protected RestError getRestErrorTemplate(Exception ex) {
         Map<String, RestError> mappings = this.exceptionMappings;
+
         if (CollectionUtils.isEmpty(mappings)) {
             return null;
         }
+
         RestError template = null;
+
         String dominantMapping = null;
+
         int deepest = Integer.MAX_VALUE;
+
         for (Map.Entry<String, RestError> entry : mappings.entrySet()) {
             String key = entry.getKey();
+
             int depth = getDepth(key, ex);
+
             if (depth >= 0 && depth < deepest) {
                 deepest = depth;
                 dominantMapping = key;
                 template = entry.getValue();
             }
         }
+
         if (template != null && logger.isDebugEnabled()) {
             logger.debug("Resolving to RestError template '" + template + "' for exception of type [" + ex.getClass().getName() +
                     "], based on exception mapping [" + dominantMapping + "]");
         }
+
         return template;
     }
 
@@ -361,6 +370,10 @@ public class DefaultRestErrorResolver implements RestErrorResolver, MessageSourc
     }
 
     private int getDepth(String exceptionMapping, Class<?> exceptionClass, int depth) {
+        if (exceptionMapping.equalsIgnoreCase("throwable")) {
+            return depth;
+        }
+
         if (exceptionClass.getName().contains(exceptionMapping)) {
             // Found it!
             return depth;
@@ -369,6 +382,7 @@ public class DefaultRestErrorResolver implements RestErrorResolver, MessageSourc
         if (exceptionClass.equals(Throwable.class)) {
             return -1;
         }
+
         return getDepth(exceptionMapping, exceptionClass.getSuperclass(), depth + 1);
     }
 
@@ -382,8 +396,11 @@ public class DefaultRestErrorResolver implements RestErrorResolver, MessageSourc
 
         for (Map.Entry<String, String> entry : smap.entrySet()) {
             String key = entry.getKey();
+
             String value = entry.getValue();
+
             RestError template = toRestError(value);
+
             map.put(key, template);
         }
 
@@ -392,6 +409,7 @@ public class DefaultRestErrorResolver implements RestErrorResolver, MessageSourc
 
     protected RestError toRestError(String exceptionConfig) {
         String[] values = StringUtils.commaDelimitedListToStringArray(exceptionConfig);
+
         if (values == null || values.length == 0) {
             throw new IllegalStateException("Invalid config mapping.  Exception names must map to a string configuration.");
         }
@@ -407,20 +425,26 @@ public class DefaultRestErrorResolver implements RestErrorResolver, MessageSourc
         for (String value : values) {
 
             String trimmedVal = StringUtils.trimWhitespace(value);
+
             logger.debug("toRestError: parsing value: [" + trimmedVal+"]");
 
             //check to see if the value is an explicitly named key/value pair:
             String[] pair = StringUtils.split(trimmedVal, "=");
+
             if (pair != null) {
                 //explicit attribute set:
                 String pairKey = StringUtils.trimWhitespace(pair[0]);
+
                 if (!StringUtils.hasText(pairKey)) {
                     pairKey = null;
                 }
+
                 String pairValue = StringUtils.trimWhitespace(pair[1]);
+
                 if (!StringUtils.hasText(pairValue)) {
                     pairValue = null;
                 }
+
                 if ("status".equalsIgnoreCase(pairKey)) {
                     int statusCode = getRequiredInt(pairKey, pairValue);
                     builder.setStatus(statusCode);

@@ -126,7 +126,7 @@ import java.util.List;
  */
 public class RestExceptionHandler extends AbstractHandlerExceptionResolver implements InitializingBean {
 
-    private static final Logger log = LoggerFactory.getLogger(RestExceptionHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(RestExceptionHandler.class);
 
     private HttpMessageConverter<?>[] messageConverters = null;
 
@@ -297,7 +297,7 @@ public class RestExceptionHandler extends AbstractHandlerExceptionResolver imple
         try {
             mav = getModelAndView(webRequest, handler, error);
         } catch (Exception invocationEx) {
-            log.error("Acquiring ModelAndView for Exception [" + ex + "] resulted in an exception.", invocationEx);
+            logger.error("Acquiring ModelAndView for Exception [" + ex + "] resulted in an exception.", invocationEx);
         }
 
         return mav;
