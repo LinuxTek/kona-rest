@@ -206,7 +206,9 @@ public class DefaultRestErrorResolver implements RestErrorResolver, MessageSourc
     public RestError resolveError(ServletWebRequest request, Object handler, Exception ex) {
 
         RestError template = getRestErrorTemplate(ex);
+
         if (template == null) {
+            logger.debug("resolveError: template is null: aborting");
             return null;
         }
 
@@ -328,6 +330,8 @@ public class DefaultRestErrorResolver implements RestErrorResolver, MessageSourc
      * @return the template to use for the RestError instance to be constructed.
      */
     protected RestError getRestErrorTemplate(Exception ex) {
+        logger.debug("getRestErrorTemplate: called for exception: " + ex.getClass().getName());
+
         Map<String, RestError> mappings = this.exceptionMappings;
 
         if (CollectionUtils.isEmpty(mappings)) {
@@ -351,6 +355,8 @@ public class DefaultRestErrorResolver implements RestErrorResolver, MessageSourc
                 template = entry.getValue();
             }
         }
+        
+        logger.debug("getRestErrorTemplate: template: " + template);
 
         if (template != null && logger.isDebugEnabled()) {
             logger.debug("Resolving to RestError template '" + template + "' for exception of type [" + ex.getClass().getName() +
@@ -370,14 +376,11 @@ public class DefaultRestErrorResolver implements RestErrorResolver, MessageSourc
     }
 
     private int getDepth(String exceptionMapping, Class<?> exceptionClass, int depth) {
-        if (exceptionMapping.equalsIgnoreCase("throwable")) {
-            return depth;
-        }
-
         if (exceptionClass.getName().contains(exceptionMapping)) {
             // Found it!
             return depth;
         }
+
         // If we've gone as far as we can go and haven't found it...
         if (exceptionClass.equals(Throwable.class)) {
             return -1;
